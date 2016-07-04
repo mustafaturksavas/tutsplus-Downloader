@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>AMApplicationBuild</key>
-	<string>409</string>
+	<string>419</string>
 	<key>AMApplicationVersion</key>
-	<string>2.5</string>
+	<string>2.6</string>
 	<key>AMDocumentVersion</key>
 	<string>2</string>
 	<key>actions</key>
@@ -51,7 +51,14 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string>tell application "Safari"	set x to 0	set y to (do JavaScript "document.getElementsByClassName('lesson-index__download-link').length;" in tab 1 of front window)	repeat while x &lt; y		tell tab 1 of front window			do JavaScript "document.getElementsByClassName('lesson-index__download-link')['" &amp; x &amp; "'].click();"		end tell		set x to x + 1		delay 120 -- Seconds to wait after each click	end repeat	do JavaScript "document.getElementsByClassName('course-actions__download-button')[0].click();" in tab 1 of front windowend tell</string>
+					<string>set delay_time to 120 -- seconds to wait after each downloadset extra_delay to 120 -- seconds to wait after each tutorialtell application "Safari"	repeat while exists tab 1 of front window		tell application "Safari"			set x to 0			set y to (do JavaScript "document.getElementsByClassName('lesson-index__download-link').length;" in tab 1 of front window)			repeat while x &lt; y				tell tab 1 of front window					do JavaScript "document.getElementsByClassName('lesson-index__download-link')['" &amp; x &amp; "'].click();"				end tell				set x to x + 1				delay delay_time			end repeat			set download_link to (do JavaScript "document.getElementsByClassName('course-actions__download-button')[0].href;" in tab 1 of front window)			if download_link is not missing value then				do JavaScript "document.getElementsByClassName('course-actions__download-button')[0].click();" in tab 1 of front window			end if
+			set title to (do JavaScript "document.title;" in tab 1 of front window)			set URL_github to (do JavaScript "document.getElementsByClassName('course-actions__github-link')[0].href;" in tab 1 of front window)		end tell
+		delay extra_delay -- Wait for a while so everything gets downloaded
+		set homePath to (path to home folder) as text		tell application "Finder"			set downloads_folder to (homePath &amp; "Downloads")			make new folder at downloads_folder with properties {name:title}			set folder_location to (downloads_folder &amp; ":" &amp; title)			set tutorial to every file in folder downloads_folder whose name starts with title
+			if URL_github is not missing value then
+			make new internet location file at folder_location to URL_github with properties {name:"View on GitHub"}
+			end if
+			repeat with this_file in tutorial				move this_file to folder folder_location			end repeat		end tell		close tab 1 of front window	end repeatend tell</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>
